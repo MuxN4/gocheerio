@@ -1,0 +1,17 @@
+# Use LF for all text files
+* text=auto
+
+# Ensure Go files use LF endings
+*.go text eol=lf
+
+# Binary files - do not perform any conversions
+*.jpg binary
+*.png binary
+*.gif binary
+*.zip binary
+*.exe binary
+
+# Mark other specific file types as text
+*.md text
+*.json text
+*.yaml text
