@@ -24,43 +24,67 @@ func (n *Node) Parent() *Node {
 	return NewNode(n.Node.Parent, n.document)
 }
 
+// FirstChild returns the first child element node, skipping non-element nodes
 func (n *Node) FirstChild() *Node {
-	if n.Node.FirstChild == nil {
-		return nil
+	current := n.Node.FirstChild
+	for current != nil {
+		if current.Type == html.ElementNode {
+			return NewNode(current, n.document)
+		}
+		current = current.NextSibling
 	}
-	return NewNode(n.Node.FirstChild, n.document)
+	return nil
 }
 
+// LastChild returns the last child element node, skipping non-element nodes
 func (n *Node) LastChild() *Node {
-	if n.Node.LastChild == nil {
-		return nil
+	current := n.Node.LastChild
+	for current != nil {
+		if current.Type == html.ElementNode {
+			return NewNode(current, n.document)
+		}
+		current = current.PrevSibling
 	}
-	return NewNode(n.Node.LastChild, n.document)
+	return nil
 }
 
 func (n *Node) NextSibling() *Node {
-	if n.Node.NextSibling == nil {
-		return nil
+	current := n.Node.NextSibling
+	for current != nil {
+		if current.Type == html.ElementNode {
+			return NewNode(current, n.document)
+		}
+		current = current.NextSibling
 	}
-	return NewNode(n.Node.NextSibling, n.document)
+	return nil
 }
 
 func (n *Node) PrevSibling() *Node {
-	if n.Node.PrevSibling == nil {
-		return nil
+	current := n.Node.PrevSibling
+	for current != nil {
+		if current.Type == html.ElementNode {
+			return NewNode(current, n.document)
+		}
+		current = current.PrevSibling
 	}
-	return NewNode(n.Node.PrevSibling, n.document)
+	return nil
 }
 
 // Each traverses nodes, calling the callback, stops if callback returns false
-func (n *Node) Each(callback func(*Node) bool) {
+func (n *Node) Each(callback func(*Node) bool) bool {
 	if !callback(n) {
-		return
+		return false
 	}
 
-	for child := n.FirstChild(); child != nil; child = child.NextSibling() {
-		child.Each(callback)
+	for child := n.Node.FirstChild; child != nil; child = child.NextSibling {
+		if child.Type == html.ElementNode {
+			childNode := NewNode(child, n.document)
+			if !childNode.Each(callback) {
+				return false
+			}
+		}
 	}
+	return true
 }
 
 // FindNodes returns all descendant nodes matching the specified criteria
