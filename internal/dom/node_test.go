@@ -1,4 +1,3 @@
-// node_test.go
 package dom
 
 import (
