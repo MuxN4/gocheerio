@@ -51,3 +51,26 @@ func (n *Node) PrevSibling() *Node {
 	}
 	return NewNode(n.Node.PrevSibling, n.document)
 }
+
+// Each traverses nodes, calling the callback, stops if callback returns false
+func (n *Node) Each(callback func(*Node) bool) {
+	if !callback(n) {
+		return
+	}
+
+	for child := n.FirstChild(); child != nil; child = child.NextSibling() {
+		child.Each(callback)
+	}
+}
+
+// FindNodes returns all descendant nodes matching the specified criteria
+func (n *Node) FindNodes(matcher func(*Node) bool) *Selection {
+	var matches []*Node
+	n.Each(func(node *Node) bool {
+		if matcher(node) {
+			matches = append(matches, node)
+		}
+		return true
+	})
+	return NewSelection(matches, n.document)
+}
