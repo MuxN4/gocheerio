@@ -43,3 +43,8 @@ func (s *Selection) Each(callback func(int, *Node)) {
 		callback(i, node)
 	}
 }
+
+// Nodes returns the underlying node slice
+func (s *Selection) Nodes() []*Node {
+	return s.nodes
+}
