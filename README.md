@@ -1,4 +1,4 @@
-<p align="center"> <img src="logo/l.svg" alt="GoCheerio Logo" width="150"/> </p> <h1 align="center">GoCheerio</h1>
+<p align="center"> <img src="logo/logo.svg" alt="GoCheerio Logo" width="150"/> </p> <h1 align="center">GoCheerio</h1>
 
 ## Features (Planned)
 
