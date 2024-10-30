@@ -1,6 +1,4 @@
-# GoCheerio
-
-GoCheerio is a powerful Go-based HTML parsing and manipulation library inspired by Cheerio, combining Cheerio's core features with modern enhancements for performance and efficiency.
+<p align="center"> <img src="logo/l.svg" alt="GoCheerio Logo" width="150"/> </p> <h1 align="center">GoCheerio</h1>
 
 ## Features (Planned)
 
