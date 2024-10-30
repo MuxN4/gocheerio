@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Outer circle (represents Go's circular motif) -->
+  <circle cx="200" cy="200" r="190" fill="#E0F4F9"/>
+  
+  <!-- Dynamic brackets -->
+  <g class="rotating-brackets">
+    <!-- Left bracket -->
+    <path d="M120 100 
+             L160 100 
+             Q140 200 160 300
+             L120 300
+             Q90 200 120 100" 
+          fill="#00ADD8"/>
+    
+    <!-- Right bracket -->
+    <path d="M280 100 
+             L240 100 
+             Q260 200 240 300
+             L280 300
+             Q310 200 280 100" 
+          fill="#00ADD8"/>
+  </g>
+  
+  <!-- Central 'G' emblem -->
+  <path d="M200 140
+           A60 60 0 1 1 140 200
+           L160 200
+           A40 40 0 1 0 200 160
+           L200 140
+           M200 160
+           L240 160"
+        fill="#2E424D"
+        stroke="#2E424D"
+        stroke-width="8"
+        stroke-linecap="round"/>
+  
+  <!-- Dots representing parsing/data flow -->
+  <g class="flowing-dots">
+    <circle cx="180" cy="120" r="8" fill="#00ADD8" class="dot1"/>
+    <circle cx="220" cy="280" r="8" fill="#00ADD8" class="dot2"/>
+    <circle cx="260" cy="200" r="8" fill="#00ADD8" class="dot3"/>
+  </g>
+  
+  <style>
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes flow {
+      0% { transform: translateY(0px); opacity: 0.3; }
+      50% { transform: translateY(20px); opacity: 1; }
+      100% { transform: translateY(0px); opacity: 0.3; }
+    }
+    .rotating-brackets {
+      transform-origin: center;
+      animation: rotate 20s linear infinite;
+    }
+    .dot1 { animation: flow 3s ease-in-out infinite; }
+    .dot2 { animation: flow 3s ease-in-out infinite 1s; }
+    .dot3 { animation: flow 3s ease-in-out infinite 2s; }
+  </style>
+</svg>
