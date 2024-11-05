@@ -41,7 +41,7 @@ type selection struct {
 func Load(html string) Document {
 	doc, err := dom.NewDocument(html)
 	if err != nil {
-		panic(err) // For now, I'll panic on error. Later error handling can be improved
+		panic(err) // For now, I'll panic on error. Later error handling will be improved
 	}
 	return &document{doc: doc}
 }
