@@ -36,7 +36,6 @@ func (n *Node) FirstChild() *Node {
 	return nil
 }
 
-// LastChild returns the last child element node, skipping non-element nodes
 func (n *Node) LastChild() *Node {
 	current := n.Node.LastChild
 	for current != nil {
@@ -72,16 +71,17 @@ func (n *Node) PrevSibling() *Node {
 
 // Each traverses nodes, calling the callback, stops if callback returns false
 func (n *Node) Each(callback func(*Node) bool) bool {
-	if !callback(n) {
-		return false
+	// Only process element nodes
+	if n.Node.Type == html.ElementNode {
+		if !callback(n) {
+			return false
+		}
 	}
 
 	for child := n.Node.FirstChild; child != nil; child = child.NextSibling {
-		if child.Type == html.ElementNode {
-			childNode := NewNode(child, n.document)
-			if !childNode.Each(callback) {
-				return false
-			}
+		childNode := NewNode(child, n.document)
+		if !childNode.Each(callback) {
+			return false
 		}
 	}
 	return true
