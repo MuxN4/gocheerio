@@ -70,6 +70,13 @@ func parseAttribute(attr string) *AttributeSelector {
 	// Remove [ and ]
 	attr = strings.Trim(attr, "[]")
 
+	// Handles existence check
+	if !strings.ContainsAny(attr, "=") {
+		return &AttributeSelector{
+			Key: attr,
+		}
+	}
+
 	// Split by operators
 	operators := []string{"~=", "|=", "^=", "$=", "*=", "="}
 	for _, op := range operators {
