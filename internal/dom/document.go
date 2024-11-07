@@ -19,28 +19,27 @@ func NewDocument(htmlContent string) (*Document, error) {
 	}
 
 	doc := &Document{}
-	doc.root = NewNode(node, doc)
+	doc.root = findFirstElement(node)
 	return doc, nil
+}
+
+// findFirstElement, recursively finds the first element node
+func findFirstElement(node *html.Node) *Node {
+	if node.Type == html.ElementNode {
+		return NewNode(node, nil)
+	}
+
+	for child := node.FirstChild; child != nil; child = child.NextSibling {
+		if result := findFirstElement(child); result != nil {
+			return result
+		}
+	}
+
+	return nil
 }
 
 // Root returns the document's root node for querying
 func (d *Document) Root() *Node {
-	// Find the body element
-	var body *Node
-	d.root.Each(func(n *Node) bool {
-		if n.Node.Type == html.ElementNode && n.Node.Data == "body" {
-			body = n
-			return false
-		}
-		return true
-	})
-
-	// If body is found, return its first element child
-	if body != nil {
-		return NewNode(body.Node.FirstChild, d)
-	}
-
-	// Fallback to document root if no body found
 	return d.root
 }
 
