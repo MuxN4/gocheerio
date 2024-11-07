@@ -23,8 +23,24 @@ func NewDocument(htmlContent string) (*Document, error) {
 	return doc, nil
 }
 
-// Root returns the document's root node.
+// Root returns the document's root node for querying
 func (d *Document) Root() *Node {
+	// Find the body element
+	var body *Node
+	d.root.Each(func(n *Node) bool {
+		if n.Node.Type == html.ElementNode && n.Node.Data == "body" {
+			body = n
+			return false
+		}
+		return true
+	})
+
+	// If body is found, return its first element child
+	if body != nil {
+		return NewNode(body.Node.FirstChild, d)
+	}
+
+	// Fallback to document root if no body found
 	return d.root
 }
 
