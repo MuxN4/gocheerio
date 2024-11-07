@@ -82,31 +82,38 @@ func (m *Matcher) matchesAttribute(node *dom.Node, attr *AttributeSelector) bool
 		return false
 	}
 
+	// Gets the attribute value
 	value, exists := node.GetAttribute(attr.Key)
 	if !exists {
 		return false
 	}
 
-	if attr.Value == "" {
-		return true // Just checking existence
+	// If only checking for attribute existence
+	if attr.Value == "" && attr.Operator == "" {
+		return true
 	}
 
-	// Remove quotes from attribute value for comparison
-	attrValue := strings.Trim(attr.Value, "'\"")
+	// Clean the attribute value we're looking for
+	expectedValue := strings.Trim(attr.Value, "'\"")
+
+	// If no operator is specified but value given, use exact match
+	if attr.Operator == "" {
+		return value == expectedValue
+	}
 
 	switch attr.Operator {
 	case "=":
-		return value == attrValue
+		return value == expectedValue
 	case "~=":
-		return containsWord(value, attrValue)
+		return containsWord(value, expectedValue)
 	case "|=":
-		return value == attrValue || strings.HasPrefix(value, attrValue+"-")
+		return value == expectedValue || strings.HasPrefix(value, expectedValue+"-")
 	case "^=":
-		return strings.HasPrefix(value, attrValue)
+		return strings.HasPrefix(value, expectedValue)
 	case "$=":
-		return strings.HasSuffix(value, attrValue)
+		return strings.HasSuffix(value, expectedValue)
 	case "*=":
-		return strings.Contains(value, attrValue)
+		return strings.Contains(value, expectedValue)
 	}
 
 	return false
