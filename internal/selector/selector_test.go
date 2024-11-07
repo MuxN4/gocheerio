@@ -6,6 +6,18 @@ import (
 	"github.com/MuxN4/gocheerio/internal/dom"
 )
 
+func countMatches(t *testing.T, doc *dom.Document, matcher *Matcher) int {
+	matches := 0
+	doc.Root().Each(func(n *dom.Node) bool {
+		if matcher.Matches(n) {
+			t.Logf("Matched node: %v with attributes: %v", n.Node.Data, n.Node.Attr)
+			matches++
+		}
+		return true
+	})
+	return matches
+}
+
 func TestSelectorMatching(t *testing.T) {
 	testCases := []struct {
 		name     string
@@ -65,14 +77,7 @@ func TestSelectorMatching(t *testing.T) {
 			}
 
 			matcher := NewMatcher(tc.selector)
-
-			var matches int
-			doc.Root().Each(func(n *dom.Node) bool {
-				if matcher.Matches(n) {
-					matches++
-				}
-				return true
-			})
+			matches := countMatches(t, doc, matcher)
 
 			if matches != tc.matches {
 				t.Errorf("Expected %d matches, got %d for selector %s",
