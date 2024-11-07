@@ -19,6 +19,9 @@ func NewMatcher(selector string) *Matcher {
 }
 
 func (m *Matcher) Matches(node *dom.Node) bool {
+	// Find the innermost element
+	node = findInnermostElement(node)
+
 	// For compound selectors, all parts must match
 	for _, sel := range m.selectors {
 		if !m.matchesSelector(node, sel) {
@@ -127,4 +130,21 @@ func containsWord(s, word string) bool {
 		}
 	}
 	return false
+}
+
+func findInnermostElement(node *dom.Node) *dom.Node {
+	for node != nil && node.Node.Type == html.ElementNode {
+		if node.Node.Data == "body" {
+			if child := node.FirstChild(); child != nil {
+				return child
+			}
+			break
+		}
+		if parent := node.Parent(); parent != nil {
+			node = parent
+		} else {
+			break
+		}
+	}
+	return node
 }
