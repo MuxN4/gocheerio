@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/MuxN4/gocheerio/internal/dom"
+	"golang.org/x/net/html"
 )
 
 type Matcher struct {
@@ -28,8 +29,13 @@ func (m *Matcher) Matches(node *dom.Node) bool {
 }
 
 func (m *Matcher) matchesSelector(node *dom.Node, sel *Selector) bool {
+	// Only match element nodes
+	if node.Node.Type != html.ElementNode {
+		return false
+	}
+
 	// Check tag
-	if sel.Tag != "" && sel.Tag != node.Data {
+	if sel.Tag != "" && sel.Tag != node.Node.Data {
 		return false
 	}
 
@@ -71,6 +77,11 @@ func (m *Matcher) matchesSelector(node *dom.Node, sel *Selector) bool {
 }
 
 func (m *Matcher) matchesAttribute(node *dom.Node, attr *AttributeSelector) bool {
+	// Only match element nodes
+	if node.Node.Type != html.ElementNode {
+		return false
+	}
+
 	value, exists := node.GetAttribute(attr.Key)
 	if !exists {
 		return false
@@ -80,19 +91,22 @@ func (m *Matcher) matchesAttribute(node *dom.Node, attr *AttributeSelector) bool
 		return true // Just checking existence
 	}
 
+	// Remove quotes from attribute value for comparison
+	attrValue := strings.Trim(attr.Value, "'\"")
+
 	switch attr.Operator {
 	case "=":
-		return value == attr.Value
+		return value == attrValue
 	case "~=":
-		return containsWord(value, attr.Value)
+		return containsWord(value, attrValue)
 	case "|=":
-		return value == attr.Value || strings.HasPrefix(value, attr.Value+"-")
+		return value == attrValue || strings.HasPrefix(value, attrValue+"-")
 	case "^=":
-		return strings.HasPrefix(value, attr.Value)
+		return strings.HasPrefix(value, attrValue)
 	case "$=":
-		return strings.HasSuffix(value, attr.Value)
+		return strings.HasSuffix(value, attrValue)
 	case "*=":
-		return strings.Contains(value, attr.Value)
+		return strings.Contains(value, attrValue)
 	}
 
 	return false
