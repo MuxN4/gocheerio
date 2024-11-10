@@ -19,7 +19,6 @@ func NewMatcher(selector string) *Matcher {
 }
 
 func (m *Matcher) Matches(node *dom.Node) bool {
-	// Only match element nodes
 	if node.Node.Type != html.ElementNode {
 		return false
 	}
