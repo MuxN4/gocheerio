@@ -1,6 +1,7 @@
 package selector
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/MuxN4/gocheerio/internal/dom"
@@ -77,26 +78,29 @@ func (m *Matcher) matchesSelector(node *dom.Node, sel *Selector) bool {
 
 func (m *Matcher) matchesAttribute(node *dom.Node, attr *AttributeSelector) bool {
 	value, exists := node.GetAttribute(attr.Key)
+	fmt.Printf("Node: %s, Key: %s, Value: %s, Exists: %v\n", node.Node.Data, attr.Key, value, exists)
+	fmt.Printf("Selector Value: %s, Operator: %s\n", attr.Value, attr.Operator)
+
 	if !exists {
 		return false
 	}
+
+	expectedValue := strings.Trim(attr.Value, "'\"")
+	fmt.Printf("Expected Value (after trim): %s\n", expectedValue)
 
 	// If only checking for attribute existence
 	if attr.Value == "" && attr.Operator == "" {
 		return true
 	}
 
-	// Clean the attribute value we're looking for
-	expectedValue := strings.Trim(attr.Value, "'\"")
-
-	// If no operator is specified but value given, use exact match
-	if attr.Operator == "" {
-		return value == expectedValue
+	// For value matching (both with = operator or implicit)
+	if attr.Operator == "" || attr.Operator == "=" {
+		match := value == expectedValue
+		fmt.Printf("Exact match comparison: %s == %s : %v\n", value, expectedValue, match)
+		return match
 	}
 
 	switch attr.Operator {
-	case "=":
-		return value == expectedValue
 	case "~=":
 		return containsWord(value, expectedValue)
 	case "|=":
