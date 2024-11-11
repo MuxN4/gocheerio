@@ -14,13 +14,15 @@ func countMatchesByType(t *testing.T, doc *dom.Document, matcher *Matcher, attrK
 			t.Logf("Matched node: %v with attributes: %v", n.Node.Data, n.Node.Attr)
 			var key string
 			if attrKey != "" {
+				// Only count nodes that actually have the attribute we're looking for
 				if val, exists := n.GetAttribute(attrKey); exists {
 					key = n.Node.Data + "[" + attrKey + "=" + val + "]"
+					matches[key]++
 				}
 			} else {
 				key = n.Node.Data
+				matches[key]++
 			}
-			matches[key]++
 		}
 		return true
 	})
