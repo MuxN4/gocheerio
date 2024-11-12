@@ -34,19 +34,26 @@ func (m *Matcher) Matches(node *dom.Node) bool {
 }
 
 func (m *Matcher) matchesSelector(node *dom.Node, sel *Selector) bool {
-	// Check tag
+	// !If there's an attribute selector, check it first
+	if sel.Attribute != nil {
+		if !m.matchesAttribute(node, sel.Attribute) {
+			return false
+		}
+	}
+
+	// *Check tag if specified
 	if sel.Tag != "" && sel.Tag != node.Node.Data {
 		return false
 	}
 
-	// Check ID
+	// *Check ID if specified
 	if sel.ID != "" {
 		if id, exists := node.GetAttribute("id"); !exists || id != sel.ID {
 			return false
 		}
 	}
 
-	// Check classes
+	// *Check classes if specified
 	if len(sel.Classes) > 0 {
 		nodeClass, exists := node.GetAttribute("class")
 		if !exists {
@@ -66,13 +73,6 @@ func (m *Matcher) matchesSelector(node *dom.Node, sel *Selector) bool {
 		}
 	}
 
-	// Check attribute
-	if sel.Attribute != nil {
-		if !m.matchesAttribute(node, sel.Attribute) {
-			return false
-		}
-	}
-
 	return true
 }
 
@@ -81,23 +81,22 @@ func (m *Matcher) matchesAttribute(node *dom.Node, attr *AttributeSelector) bool
 	fmt.Printf("Node: %s, Key: %s, Value: %s, Exists: %v\n", node.Node.Data, attr.Key, value, exists)
 	fmt.Printf("Selector Value: %s, Operator: %s\n", attr.Value, attr.Operator)
 
+	// If the attribute doesn't exist, no match
 	if !exists {
 		return false
+	}
+
+	// !If we're only checking for attribute existence
+	if attr.Value == "" && attr.Operator == "" {
+		return true
 	}
 
 	expectedValue := strings.Trim(attr.Value, "'\"")
 	fmt.Printf("Expected Value (after trim): %s\n", expectedValue)
 
-	// If only checking for attribute existence
-	if attr.Value == "" && attr.Operator == "" {
-		return true
-	}
-
 	// For value matching (both with = operator or implicit)
 	if attr.Operator == "" || attr.Operator == "=" {
-		match := value == expectedValue
-		fmt.Printf("Exact match comparison: %s == %s : %v\n", value, expectedValue, match)
-		return match
+		return value == expectedValue
 	}
 
 	switch attr.Operator {
