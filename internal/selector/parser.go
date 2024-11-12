@@ -1,6 +1,9 @@
 package selector
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type SelectorType int
 
@@ -59,8 +62,18 @@ func (p *Parser) Parse() []*Selector {
 		}
 	}
 
-	if current.Tag != "" || current.ID != "" || len(current.Classes) > 0 {
+	if current.Tag != "" || current.ID != "" || len(current.Classes) > 0 || current.Attribute != nil {
 		selectors = append(selectors, current)
+	}
+
+	// Debug output - add this here
+	fmt.Printf("\nParsed Selectors Debug Output:\n")
+	for i, s := range selectors {
+		fmt.Printf("Selector %d: Tag=%q, ID=%q, Classes=%v\n", i, s.Tag, s.ID, s.Classes)
+		if s.Attribute != nil {
+			fmt.Printf("  Attribute: Key=%q, Value=%q, Operator=%q\n",
+				s.Attribute.Key, s.Attribute.Value, s.Attribute.Operator)
+		}
 	}
 
 	return selectors
