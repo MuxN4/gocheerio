@@ -1,6 +1,13 @@
 package gocheerio
 
-import "github.com/MuxN4/gocheerio/internal/dom"
+import (
+	"bytes"
+	"strings"
+
+	"github.com/MuxN4/gocheerio/internal/dom"
+	"github.com/MuxN4/gocheerio/internal/selector"
+	"golang.org/x/net/html"
+)
 
 // Document represents an HTML document
 type Document interface {
@@ -25,8 +32,14 @@ type Selection interface {
 	// Text returns the combined text contents of all matched elements
 	Text() string
 
-	// Attr returns the value of the specified attribute for the first element in the Selection
+	// Attr returns the value of the specified attribute for the first element
 	Attr(name string) (string, bool)
+
+	// Each runs the given function on each element in the selection
+	Each(func(int, Selection))
+
+	// Length returns the number of elements in the selection
+	Length() int
 }
 
 type document struct {
@@ -35,21 +48,35 @@ type document struct {
 
 type selection struct {
 	sel *dom.Selection
+	doc *dom.Document // *Added document reference
 }
 
 // Load creates a new Document from HTML content
-func Load(html string) Document {
+func Load(html string) (Document, error) {
 	doc, err := dom.NewDocument(html)
 	if err != nil {
-		panic(err) // For now, I'll panic on error. Later error handling will be improved
+		return nil, err
 	}
-	return &document{doc: doc}
+	return &document{doc: doc}, nil
 }
 
-func (d *document) Find(selector string) Selection {
-	// TODO: Implement selector matching
-	// For now, return empty selection
-	return &selection{sel: dom.NewSelection(nil, d.doc)}
+func (d *document) Find(selectorStr string) Selection {
+	if selectorStr == "" {
+		return &selection{sel: dom.NewSelection(nil, d.doc), doc: d.doc}
+	}
+
+	matcher := selector.NewMatcher(selectorStr)
+	matches := make([]*dom.Node, 0)
+
+	// *Use the DOM's traversal function with the matcher
+	d.doc.Root().Each(func(n *dom.Node) bool {
+		if matcher.Matches(n) {
+			matches = append(matches, n)
+		}
+		return true
+	})
+
+	return &selection{sel: dom.NewSelection(matches, d.doc), doc: d.doc}
 }
 
 func (d *document) Html() (string, error) {
@@ -57,26 +84,81 @@ func (d *document) Html() (string, error) {
 }
 
 func (d *document) Text() string {
-	// TODO: Implement text extraction
-	return ""
+	if d.doc.Root() == nil {
+		return ""
+	}
+	var text string
+	d.doc.Root().Each(func(n *dom.Node) bool {
+		if n.Node.Type == html.TextNode {
+			text += n.Node.Data
+		}
+		return true
+	})
+	return text
 }
 
-func (s *selection) Find(selector string) Selection {
-	// TODO: Implement selector matching
-	return s
+func (s *selection) Find(selectorStr string) Selection {
+	if selectorStr == "" {
+		return &selection{sel: dom.NewSelection(nil, s.doc), doc: s.doc}
+	}
+
+	matcher := selector.NewMatcher(selectorStr)
+	matches := make([]*dom.Node, 0)
+
+	for _, node := range s.sel.Nodes() {
+		node.Each(func(n *dom.Node) bool {
+			if matcher.Matches(n) {
+				matches = append(matches, n)
+			}
+			return true
+		})
+	}
+
+	return &selection{sel: dom.NewSelection(matches, s.doc), doc: s.doc}
 }
 
 func (s *selection) Html() (string, error) {
-	// TODO: Implement HTML rendering for selection
-	return "", nil
+	nodes := s.sel.Nodes()
+	if len(nodes) == 0 {
+		return "", nil
+	}
+
+	// !Use bytes.Buffer to render HTML
+	var buf bytes.Buffer
+	err := html.Render(&buf, nodes[0].Node)
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }
 
 func (s *selection) Text() string {
-	// TODO: Implement text extraction
-	return ""
+	var texts []string
+	s.sel.Each(func(i int, n *dom.Node) {
+		if n.Node.Type == html.TextNode {
+			texts = append(texts, n.Node.Data)
+		}
+	})
+	return strings.Join(texts, " ")
 }
 
 func (s *selection) Attr(name string) (string, bool) {
-	// TODO: Implement attribute access
-	return "", false
+	nodes := s.sel.Nodes()
+	if len(nodes) == 0 {
+		return "", false
+	}
+	return nodes[0].GetAttribute(name)
+}
+
+func (s *selection) Each(f func(int, Selection)) {
+	s.sel.Each(func(i int, n *dom.Node) {
+		f(i, &selection{
+			sel: dom.NewSelection([]*dom.Node{n}, s.doc),
+			doc: s.doc,
+		})
+	})
+}
+
+func (s *selection) Length() int {
+	return len(s.sel.Nodes())
 }
