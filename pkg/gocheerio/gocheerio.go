@@ -83,18 +83,48 @@ func (d *document) Html() (string, error) {
 	return d.doc.Render()
 }
 
+func extractText(node *dom.Node) string {
+	if node == nil || node.Node == nil {
+		return ""
+	}
+
+	// If it's a text node, return its data
+	if node.Node.Type == html.TextNode {
+		return strings.TrimSpace(node.Node.Data)
+	}
+
+	// If it's an element node, collect text from children
+	var texts []string
+	for child := node.Node.FirstChild; child != nil; child = child.NextSibling {
+		childNode := &dom.Node{Node: child}
+		if text := extractText(childNode); text != "" {
+			texts = append(texts, text)
+		}
+	}
+
+	return strings.TrimSpace(strings.Join(texts, " "))
+}
+
 func (d *document) Text() string {
 	if d.doc.Root() == nil {
 		return ""
 	}
-	var text string
-	d.doc.Root().Each(func(n *dom.Node) bool {
-		if n.Node.Type == html.TextNode {
-			text += n.Node.Data
+	return extractText(d.doc.Root())
+}
+
+func (s *selection) Text() string {
+	if len(s.sel.Nodes()) == 0 {
+		return ""
+	}
+
+	var texts []string
+	for _, node := range s.sel.Nodes() {
+		if text := extractText(node); text != "" {
+			texts = append(texts, text)
 		}
-		return true
-	})
-	return text
+	}
+
+	return strings.TrimSpace(strings.Join(texts, " "))
 }
 
 func (s *selection) Find(selectorStr string) Selection {
@@ -130,16 +160,6 @@ func (s *selection) Html() (string, error) {
 		return "", err
 	}
 	return buf.String(), nil
-}
-
-func (s *selection) Text() string {
-	var texts []string
-	s.sel.Each(func(i int, n *dom.Node) {
-		if n.Node.Type == html.TextNode {
-			texts = append(texts, n.Node.Data)
-		}
-	})
-	return strings.Join(texts, " ")
 }
 
 func (s *selection) Attr(name string) (string, bool) {
