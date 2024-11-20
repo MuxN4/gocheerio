@@ -1,0 +1,52 @@
+name: Contributor Recognition
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  appreciate-contributor:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Craft Personalized Thank You
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const prUser = context.payload.pull_request.user.login;
+            const prNumber = context.payload.pull_request.number;
+            const additions = context.payload.pull_request.additions;
+            const deletions = context.payload.pull_request.deletions;
+
+            const contributionEmojis = ['🌟', '🚀', '💡', '🔧', '✨'];
+            const randomEmoji = contributionEmojis[Math.floor(Math.random() * contributionEmojis.length)];
+
+            const message = `
+            ### 🙌 Contribution Celebrated ${randomEmoji}
+
+            Hello @${prUser}, 
+
+            Your pull request #${prNumber} has been merged! 🎉
+
+            **Impact Snapshot:**
+            - Lines added: ${additions}
+            - Lines deleted: ${deletions}
+
+            Thank you so much for your contribution to Gocheerio! We’ve successfully merged your pull request, and your changes will be included in the upcoming release. 
+
+            We really appreciate the effort and time you’ve put into this. Your work is helping to improve the project, and we’re excited to see it evolve with your help. 🚀
+
+            Your attention to detail and commitment to improving the project doesn't go unnoticed. Each contribution, no matter the size, helps push our community forward.
+
+            Please don’t hesitate to contribute again in the future – there are always more ways to get involved!
+
+            Keep innovating, keep contributing! 💪
+            `;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: message
+            });
