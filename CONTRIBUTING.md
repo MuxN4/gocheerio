@@ -71,4 +71,4 @@ By participating in this project, you agree to abide by the following principles
 - Transparent Collaboration: Work openly and collaboratively with others.
 
 ## Licensing
-By contributing to GoCheerio, you agree that your contributions will be licensed under the project's MIT License.
+By contributing to GoCheerio, you agree that your contributions will be licensed under the project's [MIT License](LICENSE).
