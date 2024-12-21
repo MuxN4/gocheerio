@@ -8,11 +8,15 @@ jobs:
   appreciate-contributor:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
     steps:
       - name: Craft Personalized Thank You
         uses: actions/github-script@v7
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const prUser = context.payload.pull_request.user.login;
             const prNumber = context.payload.pull_request.number;
