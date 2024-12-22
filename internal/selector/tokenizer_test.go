@@ -30,6 +30,14 @@ func TestTokenizer(t *testing.T) {
 				{Type: TokenTypeTag, Value: "p"},
 			},
 		},
+		// token type Invalid test
+		{
+			input: "div@",
+			expected: []Token{
+				{Type: TokenTypeTag, Value: "div"},
+				{Type: TokenTypeInvalid, Value: ""},
+			},
+		},
 	}
 
 	for _, tc := range testCases {
