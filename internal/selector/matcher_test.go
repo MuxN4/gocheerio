@@ -62,6 +62,16 @@ func TestMatchesAttribute(t *testing.T) {
 			attr:     &AttributeSelector{Key: "lang", Value: "en", Operator: "|="},
 			expected: true,
 		},
+		{
+			name: "Unknown operator",
+			node: &dom.Node{Node: &html.Node{Type: html.ElementNode, Data: "div", Attr: []html.Attribute{{Key: "data-test", Val: "value"}}}},
+			attr: &AttributeSelector{
+				Key:      "data-test",
+				Value:    "value",
+				Operator: "unknown",
+			},
+			expected: false,
+		},
 	}
 
 	for _, tt := range testsCases {
