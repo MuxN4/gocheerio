@@ -86,6 +86,32 @@ func TestSelectorMatching(t *testing.T) {
 			selector: "div.test#unique",
 			expected: map[string]int{"div": 1},
 		},
+
+		// negative test cases
+		{
+			name:     "Non element node",
+			html:     "<!-- This is a comment -->",
+			selector: "p",
+			expected: map[string]int{},
+		},
+		{
+			name:     "Non-Matching ID Selector",
+			html:     "<div id='not-test'><p>Content</p></div>",
+			selector: "#test",
+			expected: map[string]int{},
+		},
+		{
+			name:     "Non-Matching Class Selector",
+			html:     "<div class='not-test'><p>Content</p></div>",
+			selector: ".test",
+			expected: map[string]int{},
+		},
+		{
+			name:     "Non-Matching Attribute Selector",
+			html:     "<div data-test='not-value'><p data-test='other'>Content</p></div>",
+			selector: "[data-test='value']",
+			expected: map[string]int{},
+		},
 	}
 
 	for _, tc := range testCases {
